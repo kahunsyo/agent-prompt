@@ -1,0 +1,29 @@
+services:
+  test-host:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ansible-test-host
+    hostname: ansible-test-host
+    privileged: true
+    cgroup_ns: host
+    volumes:
+      - type: bind
+        source: /sys/fs/cgroup
+        target: /sys/fs/cgroup
+        read_only: true
+      - type: tmpfs
+        target: /run
+      - type: tmpfs
+        target: /tmp
+    environment:
+      - container=docker
+    ports:
+      - "2222:22"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "systemctl is-system-running || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s

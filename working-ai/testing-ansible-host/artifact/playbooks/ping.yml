@@ -1,0 +1,17 @@
+---
+- name: Validate connectivity to the test host
+  hosts: test_host
+  gather_facts: false
+  tasks:
+    - name: Ping target
+      ansible.builtin.ping:
+    - name: Verify we can escalate privileges
+      ansible.builtin.command: id -u
+      register: id_output
+      become: true
+    - name: Assert root user id when escalated
+      ansible.builtin.assert:
+        that:
+          - id_output.stdout == '0'
+        fail_msg: "Failed to escalate privileges to root"
+        success_msg: "Privilege escalation working"
