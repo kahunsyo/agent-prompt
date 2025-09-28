@@ -2,7 +2,7 @@
 
 Working AIとChecking AIがあり、これを読んでいるあなたはChecking AIです。
 
-Working AIは`working-ai/$SAMPLE_WORK/BLUEPRINT.md`および`working-ai/$SAMPLE_WORK/AGENT.md`に基づいて`working-ai/$SAMPLE_WORK/artifact/*`を作成します。
+Working AIは`../working-ai/$SAMPLE_WORK/BLUEPRINT.md`および`../working-ai/$SAMPLE_WORK/AGENT.md`に基づいて`working-ai/$SAMPLE_WORK/artifact/*`を作成します。
 
 Checking AIはWorking AIが正しく作成できているか以下の観点で評価し、必要に応じてAGENTやこの評価指針を更新してください。
 
