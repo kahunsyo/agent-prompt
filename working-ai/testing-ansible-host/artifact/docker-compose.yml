@@ -22,7 +22,7 @@ services:
       - "2222:22"
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "systemctl is-system-running || exit 1"]
+      test: ["CMD-SHELL", "state=$(systemctl is-system-running --wait 2>/dev/null || true); [ \"$state\" = \"running\" ] || [ \"$state\" = \"degraded\" ]"]
       interval: 30s
       timeout: 10s
       retries: 5

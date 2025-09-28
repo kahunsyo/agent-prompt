@@ -1,17 +1,69 @@
 ---
-- name: Validate connectivity to the test host
+- name: Validate connectivity and systemd management on the test host
   hosts: test_host
   gather_facts: false
+  vars:
+    managed_service: cron
   tasks:
-    - name: Ping target
+    - name: Check SSH connectivity
       ansible.builtin.ping:
-    - name: Verify we can escalate privileges
+
+    - name: Verify privilege escalation succeeds
       ansible.builtin.command: id -u
       register: id_output
       become: true
-    - name: Assert root user id when escalated
+      changed_when: false
+
+    - name: Assert escalated user is root
       ansible.builtin.assert:
         that:
           - id_output.stdout == '0'
         fail_msg: "Failed to escalate privileges to root"
         success_msg: "Privilege escalation working"
+
+    - name: Ensure cron service is enabled and running
+      become: true
+      ansible.builtin.systemd:
+        name: "{{ managed_service }}"
+        state: started
+        enabled: true
+
+    - name: Stop cron service to verify systemd control
+      become: true
+      ansible.builtin.systemd:
+        name: "{{ managed_service }}"
+        state: stopped
+
+    - name: Confirm cron service is stopped
+      become: true
+      ansible.builtin.command: systemctl is-active {{ managed_service }}
+      register: cron_stopped
+      failed_when: cron_stopped.rc not in [0, 3]
+      changed_when: false
+
+    - name: Assert cron service reports inactive
+      ansible.builtin.assert:
+        that:
+          - cron_stopped.stdout == 'inactive'
+        fail_msg: "cron service was expected to be inactive"
+        success_msg: "cron service successfully stopped"
+
+    - name: Start cron service again for normal operations
+      become: true
+      ansible.builtin.systemd:
+        name: "{{ managed_service }}"
+        state: started
+        enabled: true
+
+    - name: Confirm cron service is active
+      become: true
+      ansible.builtin.command: systemctl is-active {{ managed_service }}
+      register: cron_active
+      changed_when: false
+
+    - name: Assert cron service reports active
+      ansible.builtin.assert:
+        that:
+          - cron_active.stdout == 'active'
+        fail_msg: "cron service failed to start"
+        success_msg: "cron service is active under systemd"

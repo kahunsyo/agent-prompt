@@ -15,7 +15,7 @@ RUN apt-get update \
        iproute2 \
        net-tools \
        curl \
-       vim \
+       cron \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -35,6 +35,8 @@ RUN useradd -m -s /bin/bash ansible \
 
 # Set root password for direct access when required
 RUN echo 'root:root' | chpasswd
+
+EXPOSE 22
 
 VOLUME ["/sys/fs/cgroup", "/run", "/tmp"]
 
