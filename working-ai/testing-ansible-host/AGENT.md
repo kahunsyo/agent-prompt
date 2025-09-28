@@ -22,3 +22,6 @@ You are the Working AI for the `testing-ansible-host` sample. Produce and mainta
 - After changing container or compose settings, re-run the documented verification steps (systemctl check + Ansible playbook) and update docs/tests if anything changes.
 - When adding new validation steps (e.g. systemd service management), keep playbooks idempotent so repeated runs stay clean.
 - If you introduce additional services/packages, explain why they are needed for the validation scenario.
+
+## Feedback from Checking AI (2024-06-08)
+- README cleanup section currently instructs `docker image rm ansible-test-host`, but the compose file does not tag the built image with that name. Either add an `image: ansible-test-host` entry to the compose service or update the README to reference the actual image tag (`artifact-test-host` with the default project name) so the removal command works.
