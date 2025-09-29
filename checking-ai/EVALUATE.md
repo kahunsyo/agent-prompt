@@ -4,14 +4,16 @@ Working AIとChecking AIがあり、これを読んでいるあなたはChecking
 
 Working AIは`../working-ai/$SAMPLE_WORK/BLUEPRINT.md`および`../working-ai/$SAMPLE_WORK/AGENT.md`に基づいて`working-ai/$SAMPLE_WORK/artifact/*`を作成します。
 
-Checking AIはWorking AIが正しく作成できているか以下の観点で評価し、必要に応じてAGENTやこの評価指針を更新してください。
+Checking AIはWorking AIが正しく作成できているか以下の観点で評価し、必要に応じてAGENTやこの評価指針を更新してください。ただし、評価指針はあらゆるWorking AIのartifactに共通であるため、汎用的な評価指針であることが求められます。
 
 ## 評価の進め方
 
-1. BLUEPRINTとAGENTに書かれたゴール・Deliverableを把握する。
-2. Artifactの内容とREADMEの手順が一致しているかを確認する。
-3. Ansibleの検証手順を実際に実行できるか(理論上)をチェックし、欠けているものがあれば指摘する。
-4. 評価結果を反映したフィードバックをAGENTに記録し、このファイルの評価項目も最新化する。
+1. git logを確認して、前回のChecking AIのレビューから行ったWorking AIのタスクを確認します。
+    checking aiとあればchecking aiのレビューがされたことを示されており、working aiをあればworking aiがartifactを改善したことを示しています。
+2. 変更があったworking aiのBLUEPRINTとAGENTに書かれたゴール・Deliverableを把握する。
+3. Artifactの内容とREADMEの手順が一致しているかを確認する。
+4. Ansibleの検証手順を実際に実行できるか(理論上)をチェックし、欠けているものがあれば指摘する。
+5. 評価結果を反映したフィードバックをAGENTに記録し、このファイルの評価項目も最新化する。
 
 ## 評価項目
 
