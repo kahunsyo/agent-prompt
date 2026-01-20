@@ -93,7 +93,8 @@ run_working_ai() {
   # ENTRYPOINTの内容を読み込んで実行
   PROMPT=$(sed -n '/```txt/,/```/p' ../ENTRYPOINT.md | sed '1d;$d')
 
-  echo "$PROMPT" | claude -p --permission-mode acceptEdits --max-turns 100 --dangerously-skip-permissions
+  #echo "$PROMPT" | claude -p --permission-mode acceptEdits --verbose --output-format stream-json --max-turns 100 --dangerously-skip-permissions | yq --input-format json -P -C 'del(.message.usage, .uuid, .session_id, .message.id)'
+  echo "$PROMPT" | claude -p --permission-mode acceptEdits --verbose --output-format stream-json --max-turns 100 --add-dir .. | yq --input-format json -P -C 'del(.message.usage, .uuid, .session_id, .message.id)'
 
   cd "$SCRIPT_DIR"
 
@@ -114,7 +115,8 @@ run_checking_ai() {
   # ENTRYPOINTの内容を読み込んで実行
   PROMPT=$(sed -n '/```txt/,/```/p' ENTRYPOINT.md | sed '1d;$d')
 
-  echo "$PROMPT" | claude -p --permission-mode acceptEdits --max-turns 100 --dangerously-skip-permissions
+  #echo "$PROMPT" | claude -p --permission-mode acceptEdits --verbose --output-format stream-json --max-turns 100 --dangerously-skip-permissions | yq --input-format json -P -C 'del(.message.usage, .uuid, .session_id, .message.id)'
+  echo "$PROMPT" | claude -p --permission-mode acceptEdits --verbose --output-format stream-json --max-turns 100 --add-dir .. | yq --input-format json -P -C 'del(.message.usage, .uuid, .session_id, .message.id)'
 
   cd "$SCRIPT_DIR"
 
