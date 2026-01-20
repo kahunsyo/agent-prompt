@@ -3,7 +3,7 @@
 set -e
 
 # デフォルト値
-SAMPLE_NAME="testing-ansible-host"
+SAMPLE_NAME="all"
 CYCLES=1
 MODE="both"
 
@@ -21,18 +21,19 @@ Usage: $0 [options]
 Better Agent Prompt Cycleを実行するスクリプト
 
 Options:
-  -s, --sample <name>     Sample project name (default: testing-ansible-host)
+  -s, --sample <name>     Sample project name (default: all)
+                          Use "all" to run all sample projects
   -c, --cycles <number>   Number of cycles to run (default: 1)
   -w, --working-only      Run Working AI only
   -e, --checking-only     Run Checking AI only
   -h, --help              Show this help message
 
 Examples:
-  # 1サイクル実行
+  # 全サンプルを1サイクル実行（デフォルト）
   $0
 
-  # 3サイクル実行
-  $0 --cycles 3
+  # 特定のサンプルを3サイクル実行
+  $0 --sample testing-ansible-host --cycles 3
 
   # Working AIのみ実行
   $0 --working-only
@@ -76,10 +77,21 @@ done
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
-# サンプルプロジェクトの存在確認
-if [ ! -d "working-ai/$SAMPLE_NAME" ]; then
-  echo "Error: Sample project 'working-ai/$SAMPLE_NAME' not found"
-  exit 1
+# サンプルプロジェクトのリストを取得
+if [ "$SAMPLE_NAME" = "all" ]; then
+  # working-ai/配下の全ディレクトリを取得（AGENT.mdとENTRYPOINT.mdを除く）
+  SAMPLE_LIST=($(find working-ai -mindepth 1 -maxdepth 1 -type d -exec basename {} \;))
+  if [ ${#SAMPLE_LIST[@]} -eq 0 ]; then
+    echo "Error: No sample projects found in working-ai/"
+    exit 1
+  fi
+else
+  # 単一サンプルの存在確認
+  if [ ! -d "working-ai/$SAMPLE_NAME" ]; then
+    echo "Error: Sample project 'working-ai/$SAMPLE_NAME' not found"
+    exit 1
+  fi
+  SAMPLE_LIST=("$SAMPLE_NAME")
 fi
 
 # Working AIを実行
@@ -123,29 +135,68 @@ run_checking_ai() {
   echo -e "${BLUE}Checking AI completed${NC}\n"
 }
 
+# Git commit function
+commit_changes() {
+  local cycle=$1
+  local stage=$2  # "working-ai" or "checking-ai"
+  local sample=$3
+
+  # Check if there are changes to commit
+  if ! git diff --quiet || ! git diff --cached --quiet || [ -n "$(git ls-files --others --exclude-standard)" ]; then
+    echo -e "${YELLOW}Committing changes...${NC}"
+
+    # Stage all changes
+    git add .
+
+    # Create commit message
+    if [ "$stage" = "working-ai" ]; then
+      COMMIT_MSG="wip: cycle $cycle working-ai for $sample"
+    else
+      COMMIT_MSG="cycle $cycle: completed for $sample"
+    fi
+
+    # Commit
+    git commit -m "$COMMIT_MSG"
+    echo -e "${GREEN}Changes committed: $COMMIT_MSG${NC}\n"
+  else
+    echo -e "${YELLOW}No changes to commit${NC}\n"
+  fi
+}
+
 # メイン処理
 echo -e "${YELLOW}========================================${NC}"
 echo -e "${YELLOW}Better Agent Prompt Cycle${NC}"
 echo -e "${YELLOW}========================================${NC}"
-echo -e "Sample: ${YELLOW}$SAMPLE_NAME${NC}"
+echo -e "Samples: ${YELLOW}${SAMPLE_LIST[@]}${NC}"
 echo -e "Cycles: ${YELLOW}$CYCLES${NC}"
 echo -e "Mode: ${YELLOW}$MODE${NC}"
 echo -e "${YELLOW}========================================${NC}\n"
 
-for i in $(seq 1 $CYCLES); do
-  echo -e "${YELLOW}=== Cycle $i/$CYCLES ===${NC}\n"
+# 各サンプルに対してループ
+for SAMPLE_NAME in "${SAMPLE_LIST[@]}"; do
+  echo -e "${YELLOW}=======================================${NC}"
+  echo -e "${YELLOW}Processing sample: $SAMPLE_NAME${NC}"
+  echo -e "${YELLOW}=======================================${NC}\n"
 
-  if [ "$MODE" = "both" ] || [ "$MODE" = "working" ]; then
-    run_working_ai
-  fi
+  for i in $(seq 1 $CYCLES); do
+    echo -e "${YELLOW}=== Cycle $i/$CYCLES for $SAMPLE_NAME ===${NC}\n"
 
-  if [ "$MODE" = "both" ] || [ "$MODE" = "checking" ]; then
-    run_checking_ai
-  fi
+    if [ "$MODE" = "both" ] || [ "$MODE" = "working" ]; then
+      run_working_ai
+      commit_changes "$i" "working-ai" "$SAMPLE_NAME"
+    fi
 
-  echo -e "${YELLOW}=== Cycle $i/$CYCLES completed ===${NC}\n"
+    if [ "$MODE" = "both" ] || [ "$MODE" = "checking" ]; then
+      run_checking_ai
+      commit_changes "$i" "checking-ai" "$SAMPLE_NAME"
+    fi
+
+    echo -e "${YELLOW}=== Cycle $i/$CYCLES for $SAMPLE_NAME completed ===${NC}\n"
+  done
+
+  echo -e "${GREEN}All cycles for $SAMPLE_NAME completed!${NC}\n"
 done
 
 echo -e "${GREEN}========================================${NC}"
-echo -e "${GREEN}All cycles completed!${NC}"
+echo -e "${GREEN}All samples and cycles completed!${NC}"
 echo -e "${GREEN}========================================${NC}"
