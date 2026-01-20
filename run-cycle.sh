@@ -103,9 +103,9 @@ run_working_ai() {
     echo -e "${YELLOW}[DRY RUN] Working directory: $(pwd)${NC}"
     echo -e "${YELLOW}[DRY RUN] Prompt to be executed:${NC}"
     echo "$PROMPT"
-    echo -e "\n${YELLOW}[DRY RUN] Command: echo \"\$PROMPT\" | claude -p --permission-mode acceptEdits --max-turns 100 --dangerously-skip-permissions${NC}"
+    echo -e "\n${YELLOW}[DRY RUN] Command: claude -p --permission-mode acceptEdits --max-turns 100 --dangerously-skip-permissions <<< \"\$PROMPT\"${NC}"
   else
-    echo "$PROMPT" | claude -p --permission-mode acceptEdits --max-turns 100 --dangerously-skip-permissions
+    claude -p --permission-mode acceptEdits --max-turns 100 --dangerously-skip-permissions <<< "$PROMPT"
   fi
 
   cd "$SCRIPT_DIR"
@@ -132,9 +132,9 @@ run_checking_ai() {
     echo -e "${YELLOW}[DRY RUN] Environment: SAMPLE_WORK=$SAMPLE_WORK${NC}"
     echo -e "${YELLOW}[DRY RUN] Prompt to be executed:${NC}"
     echo "$PROMPT"
-    echo -e "\n${YELLOW}[DRY RUN] Command: echo \"\$PROMPT\" | claude -p --permission-mode acceptEdits --max-turns 100 --dangerously-skip-permissions${NC}"
+    echo -e "\n${YELLOW}[DRY RUN] Command: claude -p --permission-mode acceptEdits --max-turns 100 --dangerously-skip-permissions <<< \"\$PROMPT\"${NC}"
   else
-    echo "$PROMPT" | claude -p --permission-mode acceptEdits --max-turns 100 --dangerously-skip-permissions
+    claude -p --permission-mode acceptEdits --max-turns 100 --dangerously-skip-permissions <<< "$PROMPT"
   fi
 
   cd "$SCRIPT_DIR"
