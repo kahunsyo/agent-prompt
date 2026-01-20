@@ -6,6 +6,22 @@
 
 Working AIとChecking AIの2つのAIエージェントが協力し、Better Agent Prompt Cycleを繰り返すことで、より汎用的で効果的なAGENT.mdを生成します。複数のサンプルプロジェクトでこのサイクルを回すことで、プロジェクト固有の要素を除外し、どのようなプロジェクトでも適用できる普遍的なAGENT.mdを抽出することが目標です。
 
+## 使い方
+
+```bash
+# 1サイクル実行（Working AI → Checking AI）
+./run-cycle.sh
+
+# 3サイクル実行
+./run-cycle.sh --cycles 3
+
+# Working AIのみ実行
+./run-cycle.sh --working-only
+
+# Checking AIのみ実行
+./run-cycle.sh --checking-only
+```
+
 ## Architecture
 
 ```mermaid
