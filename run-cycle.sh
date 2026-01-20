@@ -6,6 +6,7 @@ set -e
 SAMPLE_NAME="testing-ansible-host"
 CYCLES=1
 MODE="both"
+DRY_RUN=false
 
 # 色定義
 GREEN='\033[0;32m'
@@ -25,6 +26,7 @@ Options:
   -c, --cycles <number>   Number of cycles to run (default: 1)
   -w, --working-only      Run Working AI only
   -e, --checking-only     Run Checking AI only
+  -d, --dry-run           Show what would be executed without running
   -h, --help              Show this help message
 
 Examples:
@@ -62,6 +64,10 @@ while [[ $# -gt 0 ]]; do
       MODE="checking"
       shift
       ;;
+    -d|--dry-run)
+      DRY_RUN=true
+      shift
+      ;;
     -h|--help)
       usage
       ;;
@@ -91,9 +97,16 @@ run_working_ai() {
   cd "working-ai/$SAMPLE_NAME"
 
   # ENTRYPOINTの内容を読み込んで実行
-  PROMPT=$(sed -n '/```txt/,/```/p' ../ENTRYPOINT.md | sed '1d;$d')
+  PROMPT=$(awk '/```txt/{flag=1;next}/```/{flag=0}flag' ../ENTRYPOINT.md)
 
-  echo "$PROMPT" | claude -p --permission-mode acceptEdits --max-turns 100 --dangerously-skip-permissions
+  if [ "$DRY_RUN" = true ]; then
+    echo -e "${YELLOW}[DRY RUN] Working directory: $(pwd)${NC}"
+    echo -e "${YELLOW}[DRY RUN] Prompt to be executed:${NC}"
+    echo "$PROMPT"
+    echo -e "\n${YELLOW}[DRY RUN] Command: echo \"\$PROMPT\" | claude -p --permission-mode acceptEdits --max-turns 100 --dangerously-skip-permissions${NC}"
+  else
+    echo "$PROMPT" | claude -p --permission-mode acceptEdits --max-turns 100 --dangerously-skip-permissions
+  fi
 
   cd "$SCRIPT_DIR"
 
@@ -112,9 +125,17 @@ run_checking_ai() {
   export SAMPLE_WORK=$SAMPLE_NAME
 
   # ENTRYPOINTの内容を読み込んで実行
-  PROMPT=$(sed -n '/```txt/,/```/p' ENTRYPOINT.md | sed '1d;$d')
+  PROMPT=$(awk '/```txt/{flag=1;next}/```/{flag=0}flag' ENTRYPOINT.md)
 
-  echo "$PROMPT" | claude -p --permission-mode acceptEdits --max-turns 100 --dangerously-skip-permissions
+  if [ "$DRY_RUN" = true ]; then
+    echo -e "${YELLOW}[DRY RUN] Working directory: $(pwd)${NC}"
+    echo -e "${YELLOW}[DRY RUN] Environment: SAMPLE_WORK=$SAMPLE_WORK${NC}"
+    echo -e "${YELLOW}[DRY RUN] Prompt to be executed:${NC}"
+    echo "$PROMPT"
+    echo -e "\n${YELLOW}[DRY RUN] Command: echo \"\$PROMPT\" | claude -p --permission-mode acceptEdits --max-turns 100 --dangerously-skip-permissions${NC}"
+  else
+    echo "$PROMPT" | claude -p --permission-mode acceptEdits --max-turns 100 --dangerously-skip-permissions
+  fi
 
   cd "$SCRIPT_DIR"
 
@@ -128,6 +149,9 @@ echo -e "${YELLOW}========================================${NC}"
 echo -e "Sample: ${YELLOW}$SAMPLE_NAME${NC}"
 echo -e "Cycles: ${YELLOW}$CYCLES${NC}"
 echo -e "Mode: ${YELLOW}$MODE${NC}"
+if [ "$DRY_RUN" = true ]; then
+  echo -e "Dry Run: ${YELLOW}ENABLED${NC}"
+fi
 echo -e "${YELLOW}========================================${NC}\n"
 
 for i in $(seq 1 $CYCLES); do
