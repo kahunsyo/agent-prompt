@@ -20,6 +20,9 @@ Working AIとChecking AIの2つのAIエージェントが協力し、Better Agen
 
 # Checking AIのみ実行
 ./run-cycle.sh --checking-only
+
+# ドライランモード（実行内容を確認）
+./run-cycle.sh --dry-run
 ```
 
 ## Architecture
